@@ -10,19 +10,19 @@ public class Client {
         return serviceType;
     }
 
-    public int getEmptyTime() {
+    public double getEmptyTime() {
         return emptyTime;
     }
 
     private int number;
     private int serviceType;
-    private int emptyTime;
+    private double emptyTime;
 
     public void setNumber(int number) {
         this.number = number;
     }
 
-    public void setEmptyTime(int emptyTime) {
+    public void setEmptyTime(double emptyTime) {
         this.emptyTime = emptyTime;
     }
 

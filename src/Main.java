@@ -6,22 +6,25 @@ public class Main {
     private static int N = 0;
     private static int c1;
     private static int c2;
-    private static int[] A = new int[10000];
-    private static int[] C = new int[10000];
-    private static int t1 = 10000000;
-    private static int ta = 10000000;
-    private static int t2 = 10000000;
-    private static int tw = 10000000;
-    private static int t;
+    private static double[] A = new double[10000];
+    private static double[] C = new double[10000];
+    private static double t1 = 10000000;
+    private static double ta = 10000000;
+    private static double t2 = 10000000;
+    private static double tw = 10000000;
+    private static double t;
+    private static double[] timeOfSettingOrder = new double[10000];
+    private static double[] timeOfGettingOrder = new double[10000];
+    private static double[] timeOfCheckingOut = new double[10000];
     private static SystemState systemState = new SystemState();
 
     public static void main(String[] args) {
         int z = 360;
-        lambda[0] = 10;
-        lambda[1] = 10;
-        lambda[2]= 10;
-        lambda[3] = 10;
-        lambda[4] = 10;
+        lambda[0] = 1;
+        lambda[1] = 100;
+        lambda[2] = 110;
+        lambda[3] = 5;
+        lambda[4] = 1;
         ta = createTimeClientArrival(t);
         while (t < z) {
             if (getMin() == ta)
@@ -33,13 +36,28 @@ public class Main {
             if (getMin() == tw)
                 finishWaiting();
         }
+        for (int i=0; i<A.length; i++)
+            if (A[i]!=0)
+            System.out.println("A[" + i + "] = " + A[i]);
+        for (int i=0; i<timeOfSettingOrder.length; i++) {
+            if (timeOfSettingOrder[i] !=0)
+            System.out.println("Оставление заказа[" + i + "] = " + timeOfSettingOrder[i]);
+        }
+        for (int i=0; i<timeOfGettingOrder.length; i++) {
+            if (timeOfGettingOrder[i] !=0)
+            System.out.println("Получение заказа[" + i + "] = " + timeOfGettingOrder[i]);
+        }
+        for (int i=0; i<timeOfCheckingOut.length; i++)
+            if (timeOfCheckingOut[i] !=0)
+                System.out.println("Получение чека[" + i + "] = " + timeOfCheckingOut[i]);
+
         System.out.println("Успех");
 
     }
 
 
-    private static int getMin() {
-        int tmp = t1;
+    private static double getMin() {
+        double tmp = t1;
         if (tmp > ta)
             tmp = ta;
         if (tmp > t2)
@@ -61,27 +79,31 @@ public class Main {
             systemState.setClientsCount(systemState.getClientsCount() + 1);
             systemState.setSecondDeviceState(1);
             systemState.setClientAtSecondDevice(N);
-            System.out.println("Клиент №" + N + " прибыл и встал на обслуживание на устройство №2 и первое - занято "  + t);
+            double tmp = getTimes(2);
+            t1 =  (tmp + t);
+            timeOfSettingOrder[N] = tmp;
+            System.out.println("Клиент №" + N + " прибыл и встал на обслуживание на устройство №2 и первое - занято " + t);
 
-        }
-        else {
+        } else {
             if (systemState.getFirstDeviceState() == 0 && systemState.getSecondDeviceState() == 0) {
                 systemState.setFirstDeviceState(1);
                 systemState.setClientAtFirstDevice(N);
                 systemState.setClientsCount(systemState.getClientsCount() + 1);
-                t1 = (int) (getTimes(1) + t);
+                double tmp = getTimes(1);
+                t1 = (tmp + t);
+                timeOfSettingOrder[N] = tmp;
                 System.out.println("Клиент №" + N + " прибыл и встал на обслуживание на устройство №1 и второе  - свободно " + t);
-            }
-            else {
+            } else {
 
                 if (systemState.getFirstDeviceState() == 0 && systemState.getSecondDeviceState() != 0) {
                     systemState.setClientsCount(systemState.getClientsCount() + 1);
                     systemState.setFirstDeviceState(1);
                     systemState.setClientAtFirstDevice(N);
-                    t1 = (int) (t + getTimes(1));
+                    double tmp = getTimes(1);
+                    t1 =  (tmp + t);
+                    timeOfSettingOrder[N] = tmp;
                     System.out.println("Клиент №" + N + " прибыл и встал на обслуживание на устройство №1 и второе - занято " + t);
-                }
-                else {
+                } else {
 
 
                     if (systemState.getFirstDeviceState() != 0 && systemState.getSecondDeviceState() != 0) {
@@ -109,20 +131,35 @@ public class Main {
                     systemState.setFirstDeviceState(clients.get(i).getServiceType());
                     systemState.setClientAtFirstDevice(clients.get(i).getNumber());
                     System.out.println("Клиент №" + clients.get(i).getNumber() + " прекратил ожидание и стал обслуживаться первым устройством " + t);
+                    double tmp = getTimes(1);
+                    t1 = (t + tmp);
+                    if (clients.get(i).getServiceType() == 1)
+                        timeOfSettingOrder[clients.get(i).getNumber()] = tmp;
+                    if (clients.get(i).getServiceType() == 2)
+                        timeOfGettingOrder[clients.get(i).getNumber()] = tmp;
+                    if (clients.get(i).getServiceType() == 3)
+                        timeOfCheckingOut[clients.get(i).getNumber()] = tmp;
+
                     clients.remove(i);
                     i--;
-                    t1 = (int) (t + getTimes(1));
                 } else {
                     if (systemState.getSecondDeviceState() == 0) {
                         systemState.setSecondDeviceState(clients.get(i).getServiceType());
                         systemState.setClientAtSecondDevice(clients.get(i).getNumber());
-                        System.out.println("Клиент №" + clients.get(i).getNumber() + " прекратил ожидание и стал обслуживаться вторым устройством "  + t);
+                        System.out.println("Клиент №" + clients.get(i).getNumber() + " прекратил ожидание и стал обслуживаться вторым устройством " + t);
+                        double tmp = getTimes(2);
+                        if (clients.get(i).getServiceType() == 1)
+                            timeOfSettingOrder[clients.get(i).getNumber()] = tmp;
+                        if (clients.get(i).getServiceType() == 2)
+                            timeOfGettingOrder[clients.get(i).getNumber()] = tmp;
+                        if (clients.get(i).getServiceType() == 3)
+                            timeOfCheckingOut[clients.get(i).getNumber()] = tmp;
+                        t2 = (t + tmp);
                         clients.remove(i);
                         i--;
-                        t2 = (int) (t + getTimes(2));
 
                     } else {
-                        System.out.println("Клиент №" + clients.get(i).getNumber() + " прекратил ожидание и попал в очередь, пока оба устройства - заняты "  + t);
+                        System.out.println("Клиент №" + clients.get(i).getNumber() + " прекратил ожидание и попал в очередь, пока оба устройства - заняты " + t);
                         systemState.setClientQueue(clients.get(i));
                         clients.remove(i);
                         i--;
@@ -146,30 +183,37 @@ public class Main {
 
     private static void finishDevice2() {
         t = t2;
-        int tw1;
-        int tw2;
+        double tw1;
+        double tw2;
         Client anotherClient;
         switch (systemState.getSecondDeviceState()) {
             case 1: {
                 Client client = new Client();
-                tw1 = (int) (getTimes(3) + t);
+                tw1 =  (getTimes(3) + t);
                 client.setNumber(systemState.getClientAtSecondDevice());
                 client.setEmptyTime(tw1);
                 client.setServiceType(2);
-                System.out.println("Клиент №" + client.getNumber() + " оставил свой заказ "  + t);
+                System.out.println("Клиент №" + client.getNumber() + " оставил свой заказ " + t);
                 systemState.setClients(client);
                 anotherClient = systemState.getClientFromQueue();
                 systemState.setClientAtSecondDevice(anotherClient.getNumber());
                 systemState.setSecondDeviceState(anotherClient.getServiceType());
-                if (anotherClient.getNumber() !=0)
-                System.out.println("Клиент №" + anotherClient.getNumber() + " стал обслуживаться вторым устройством "  + t);
+                if (anotherClient.getNumber() != 0)
+                    System.out.println("Клиент №" + anotherClient.getNumber() + " стал обслуживаться вторым устройством " + t);
 
                 if (tw1 < tw) {
                     tw = tw1;
 
                 }
                 if (anotherClient.getNumber() != 0) {
-                    t2 = (int) (getTimes(2) + t);
+                    double tmp = getTimes(2);
+                    if (anotherClient.getServiceType() == 1)
+                        timeOfSettingOrder[anotherClient.getNumber()] = tmp;
+                    if (anotherClient.getServiceType() == 2)
+                        timeOfGettingOrder[anotherClient.getNumber()] = tmp;
+                    if (anotherClient.getServiceType() == 3)
+                        timeOfCheckingOut[anotherClient.getNumber()] = tmp;
+                    t2 =  (tmp + t);
                 } else {
 
                     t2 = 10000000;
@@ -179,17 +223,17 @@ public class Main {
             }
             case 2: {
                 Client client = new Client();
-                tw2 = (int) (t + getTimes(4));
+                tw2 = (t + getTimes(4));
                 client.setNumber(systemState.getClientAtSecondDevice());
                 client.setEmptyTime(tw2);
                 client.setServiceType(3);
                 systemState.setClients(client);
-                System.out.println("Клиент №" + client.getNumber() + " получил свой заказ "  + t);
+                System.out.println("Клиент №" + client.getNumber() + " получил свой заказ " + t);
                 anotherClient = systemState.getClientFromQueue();
                 systemState.setClientAtSecondDevice(anotherClient.getNumber());
                 systemState.setSecondDeviceState(anotherClient.getServiceType());
-                if (anotherClient.getNumber() !=0)
-                System.out.println("Клиент №" + anotherClient.getNumber() + " стал обслуживаться вторым устройством "  + t);
+                if (anotherClient.getNumber() != 0)
+                    System.out.println("Клиент №" + anotherClient.getNumber() + " стал обслуживаться вторым устройством " + t);
 
                 if (tw2 < tw) {
                     tw = tw2;
@@ -197,7 +241,14 @@ public class Main {
 
                 }
                 if (anotherClient.getNumber() != 0) {
-                    t2 = (int) (getTimes(2) + t);
+                    double tmp = getTimes(2);
+                    if (anotherClient.getServiceType() == 1)
+                        timeOfSettingOrder[anotherClient.getNumber()] = tmp;
+                    if (anotherClient.getServiceType() == 2)
+                        timeOfGettingOrder[anotherClient.getNumber()] = tmp;
+                    if (anotherClient.getServiceType() == 3)
+                        timeOfCheckingOut[anotherClient.getNumber()] = tmp;
+                    t2 =  (getTimes(2) + t);
                 } else {
 
                     t2 = 10000000;
@@ -209,15 +260,22 @@ public class Main {
             case 3: {
                 c2 += 1;
                 C[systemState.getClientAtSecondDevice()] = t;
-                System.out.println("Клиент №" + systemState.getClientAtSecondDevice() + " вышел из системы от второго устройства "  + t);
+                System.out.println("Клиент №" + systemState.getClientAtSecondDevice() + " вышел из системы от второго устройства " + t);
                 systemState.setClientsCount(systemState.getClientsCount() - 1);
                 anotherClient = systemState.getClientFromQueue();
                 systemState.setClientAtSecondDevice(anotherClient.getNumber());
                 systemState.setSecondDeviceState(anotherClient.getServiceType());
-                if (anotherClient.getNumber() !=0)
-                System.out.println("Клиент №" + anotherClient.getNumber() + " стал обслуживаться вторым устройством "  + t);
+                if (anotherClient.getNumber() != 0)
+                    System.out.println("Клиент №" + anotherClient.getNumber() + " стал обслуживаться вторым устройством " + t);
                 if (anotherClient.getNumber() != 0) {
-                    t2 = (int) (getTimes(2) + t);
+                    double tmp = getTimes(2);
+                    if (anotherClient.getServiceType() == 1)
+                        timeOfSettingOrder[anotherClient.getNumber()] = tmp;
+                    if (anotherClient.getServiceType() == 2)
+                        timeOfGettingOrder[anotherClient.getNumber()] = tmp;
+                    if (anotherClient.getServiceType() == 3)
+                        timeOfCheckingOut[anotherClient.getNumber()] = tmp;
+                    t2 =  (tmp + t);
                 } else {
 
                     t2 = 10000000;
@@ -235,30 +293,37 @@ public class Main {
 
     private static void finishDevice1() {
         t = t1;
-        int tw1;
-        int tw2;
+        double tw1;
+        double tw2;
         Client anotherClient;
         switch (systemState.getFirstDeviceState()) {
 
             case 1: {
                 Client client = new Client();
-                tw1 = (int) (getTimes(3) + t);
+                tw1 = (getTimes(3) + t);
                 client.setNumber(systemState.getClientAtFirstDevice());
                 client.setEmptyTime(tw1);
                 client.setServiceType(2);
                 systemState.setClients(client);
-                System.out.println("Клиент №" + client.getNumber() + " оставил свой заказ "  + t);
+                System.out.println("Клиент №" + client.getNumber() + " оставил свой заказ " + t);
                 anotherClient = systemState.getClientFromQueue();
                 systemState.setClientAtFirstDevice(anotherClient.getNumber());
                 systemState.setFirstDeviceState(anotherClient.getServiceType());
-                if (anotherClient.getNumber() !=0)
-                System.out.println("Клиент №" + anotherClient.getNumber() + " стал обслуживаться первым устройством "  + t);
+                if (anotherClient.getNumber() != 0)
+                    System.out.println("Клиент №" + anotherClient.getNumber() + " стал обслуживаться первым устройством " + t);
                 if (tw1 < tw) {
                     tw = tw1;
 
                 }
                 if (anotherClient.getNumber() != 0) {
-                    t1 = (int) (getTimes(1) + t);
+                    double tmp = getTimes(1);
+                    if (anotherClient.getServiceType() == 1)
+                        timeOfSettingOrder[anotherClient.getNumber()] = tmp;
+                    if (anotherClient.getServiceType() == 2)
+                        timeOfGettingOrder[anotherClient.getNumber()] = tmp;
+                    if (anotherClient.getServiceType() == 3)
+                        timeOfCheckingOut[anotherClient.getNumber()] = tmp;
+                    t1 =  (tmp + t);
                 } else {
 
                     t1 = 10000000;
@@ -267,8 +332,7 @@ public class Main {
                 break;
             }
             case 2: {
-                tw2 = (int) (t + getTimes(4));
-
+                tw2 = (t + getTimes(4));
                 Client client = new Client();
                 client.setNumber(systemState.getClientAtFirstDevice());
                 client.setEmptyTime(tw2);
@@ -278,8 +342,8 @@ public class Main {
                 anotherClient = systemState.getClientFromQueue();
                 systemState.setClientAtFirstDevice(anotherClient.getNumber());
                 systemState.setFirstDeviceState(anotherClient.getServiceType());
-                if (anotherClient.getNumber() !=0)
-                System.out.println("Клиент №" + anotherClient.getNumber() + " стал обслуживаться первым устройством "  + t);
+                if (anotherClient.getNumber() != 0)
+                    System.out.println("Клиент №" + anotherClient.getNumber() + " стал обслуживаться первым устройством " + t);
 
                 if (tw2 < tw) {
                     tw = tw2;
@@ -287,7 +351,14 @@ public class Main {
 
                 }
                 if (anotherClient.getNumber() != 0) {
-                    t1 = (int) (getTimes(1) + t);
+                    double tmp = getTimes(1);
+                    if (anotherClient.getServiceType() == 1)
+                        timeOfSettingOrder[anotherClient.getNumber()] = tmp;
+                    if (anotherClient.getServiceType() == 2)
+                        timeOfGettingOrder[anotherClient.getNumber()] = tmp;
+                    if (anotherClient.getServiceType() == 3)
+                        timeOfCheckingOut[anotherClient.getNumber()] = tmp;
+                    t1 =  (tmp + t);
                 } else {
 
                     t1 = 10000000;
@@ -299,16 +370,23 @@ public class Main {
             case 3: {
                 c1 += 1;
                 C[systemState.getClientAtFirstDevice()] = t;
-                System.out.println("Клиент №" + systemState.getClientAtFirstDevice() + " вышел из системы от первого устройства "  + t);
+                System.out.println("Клиент №" + systemState.getClientAtFirstDevice() + " вышел из системы от первого устройства " + t);
                 systemState.setClientsCount(systemState.getClientsCount() - 1);
                 anotherClient = systemState.getClientFromQueue();
                 systemState.setClientAtFirstDevice(anotherClient.getNumber());
                 systemState.setFirstDeviceState(anotherClient.getServiceType());
-                if (anotherClient.getNumber() !=0)
-                System.out.println("Клиент №" + anotherClient.getNumber() + " стал обслуживаться первым устройством "  + t);
+                if (anotherClient.getNumber() != 0)
+                    System.out.println("Клиент №" + anotherClient.getNumber() + " стал обслуживаться первым устройством " + t);
                 if (anotherClient.getNumber() != 0) {
-                    t1 = (int) (getTimes(1) + t);
-                } else {
+                    double tmp = getTimes(1);
+                    if (anotherClient.getServiceType() == 1)
+                        timeOfSettingOrder[anotherClient.getNumber()] = tmp;
+                    if (anotherClient.getServiceType() == 2)
+                        timeOfGettingOrder[anotherClient.getNumber()] = tmp;
+                    if (anotherClient.getServiceType() == 3)
+                        timeOfCheckingOut[anotherClient.getNumber()] = tmp;
+                    t1 =  (tmp + t);                }
+                    else {
 
                     t1 = 10000000;
 
@@ -324,23 +402,27 @@ public class Main {
     }
 
 
-    private static int createTimeClientArrival(int minute) {
-        int t;
+    private static double createTimeClientArrival(double minute) {
+        double t;
         double tmp2;
-       // do {
+        do {
             t = minute;
             double tmp = Math.random();
-            t = ((int) (t - (1 / (lambda[0] * Math.log(tmp)))));
+            t =  (t - (1 / (lambda[0] * Math.log(tmp))));
             tmp2 = Math.random();
-    //    }
-     //   while (tmp2 <= getLambdaOtT(t) / t);
+        }
+        while (tmp2 > getLambdaOtT(t) / t);
         return t + 1;
 
     }
 
-    private static double getLambdaOtT(int t) {
+    private static double getLambdaOtT(double t) {
 
-        return t;
+        if (t < 120 && t > 0)
+            return 0.9;
+        else
+            return 0.7;
+
     }
 
 
@@ -348,7 +430,7 @@ public class Main {
         double a = Math.random();
         double rez;
         rez = (-1 / lambda[b]) * Math.log(a);
-        return rez +1 ;
+        return rez + 1;
 
     }
 
