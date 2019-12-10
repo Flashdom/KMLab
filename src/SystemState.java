@@ -68,15 +68,6 @@ public class SystemState {
         this.secondDeviceState = secondDeviceState;
     }
 
-    public void setFirstDeviceState(byte firstDeviceState) {
-        this.firstDeviceState = firstDeviceState;
-    }
-
-
-    public void setSecondDeviceState(byte secondDeviceState) {
-        this.secondDeviceState = secondDeviceState;
-    }
-
     public List<Client> getClients() {
         return clients;
     }
