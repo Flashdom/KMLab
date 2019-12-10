@@ -16,15 +16,17 @@ public class Main {
     private static double[] timeOfSettingOrder = new double[10000];
     private static double[] timeOfGettingOrder = new double[10000];
     private static double[] timeOfCheckingOut = new double[10000];
+    private static double[] timeOfPrepareFood = new double[10000];
+    private static double[] timeOfEatMeal = new double[10000];
     private static SystemState systemState = new SystemState();
 
     public static void main(String[] args) {
         int z = 360;
-        lambda[0] = 1;
-        lambda[1] = 100;
-        lambda[2] = 110;
-        lambda[3] = 5;
-        lambda[4] = 1;
+        lambda[0] = 0.2;
+        lambda[1] = 0.38;
+        lambda[2] =  0.38;
+        lambda[3] = 0.1;
+        lambda[4] = 0.08;
         ta = createTimeClientArrival(t);
         while (t < z) {
             if (getMin() == ta)
@@ -50,6 +52,14 @@ public class Main {
         for (int i=0; i<timeOfCheckingOut.length; i++)
             if (timeOfCheckingOut[i] !=0)
                 System.out.println("Получение чека[" + i + "] = " + timeOfCheckingOut[i]);
+
+        for (int i=0; i<timeOfPrepareFood.length; i++)
+            if (timeOfPrepareFood[i] !=0)
+                System.out.println("Готовка[" + i + "] = " + timeOfPrepareFood[i]);
+
+        for (int i=0; i<timeOfEatMeal.length; i++)
+            if (timeOfEatMeal[i] !=0)
+                System.out.println("Еда[" + i + "] = " + timeOfEatMeal[i]);
 
         System.out.println("Успех");
 
@@ -80,7 +90,7 @@ public class Main {
             systemState.setSecondDeviceState(1);
             systemState.setClientAtSecondDevice(N);
             double tmp = getTimes(2);
-            t1 =  (tmp + t);
+            t2 =  (tmp + t);
             timeOfSettingOrder[N] = tmp;
             System.out.println("Клиент №" + N + " прибыл и встал на обслуживание на устройство №2 и первое - занято " + t);
 
@@ -174,9 +184,7 @@ public class Main {
 
             }
         }
-        systemState.clearListClients();
-        for (Client o : clients)
-            systemState.setClients(o);
+
 
     }
 
@@ -188,8 +196,10 @@ public class Main {
         Client anotherClient;
         switch (systemState.getSecondDeviceState()) {
             case 1: {
+                double tm = getTimes(3);
                 Client client = new Client();
-                tw1 =  (getTimes(3) + t);
+                tw1 =  (tm + t);
+                timeOfPrepareFood[systemState.getClientAtSecondDevice()] = tm;
                 client.setNumber(systemState.getClientAtSecondDevice());
                 client.setEmptyTime(tw1);
                 client.setServiceType(2);
@@ -222,8 +232,10 @@ public class Main {
                 break;
             }
             case 2: {
+                double tm = getTimes(4);
                 Client client = new Client();
-                tw2 = (t + getTimes(4));
+                tw2 = (t + tm);
+                timeOfEatMeal[systemState.getClientAtSecondDevice()] = tm;
                 client.setNumber(systemState.getClientAtSecondDevice());
                 client.setEmptyTime(tw2);
                 client.setServiceType(3);
@@ -248,7 +260,7 @@ public class Main {
                         timeOfGettingOrder[anotherClient.getNumber()] = tmp;
                     if (anotherClient.getServiceType() == 3)
                         timeOfCheckingOut[anotherClient.getNumber()] = tmp;
-                    t2 =  (getTimes(2) + t);
+                    t2 =  (tmp + t);
                 } else {
 
                     t2 = 10000000;
@@ -299,8 +311,10 @@ public class Main {
         switch (systemState.getFirstDeviceState()) {
 
             case 1: {
+                double tm = getTimes(3);
                 Client client = new Client();
-                tw1 = (getTimes(3) + t);
+                tw1 = (tm + t);
+                timeOfPrepareFood[systemState.getClientAtFirstDevice()] = tm;
                 client.setNumber(systemState.getClientAtFirstDevice());
                 client.setEmptyTime(tw1);
                 client.setServiceType(2);
@@ -332,8 +346,10 @@ public class Main {
                 break;
             }
             case 2: {
-                tw2 = (t + getTimes(4));
+                double tm = getTimes(4);
+                tw2 = (t + tm);
                 Client client = new Client();
+                timeOfEatMeal[systemState.getClientAtFirstDevice()] = tm;
                 client.setNumber(systemState.getClientAtFirstDevice());
                 client.setEmptyTime(tw2);
                 client.setServiceType(3);
@@ -411,7 +427,7 @@ public class Main {
             t =  (t - (1 / (lambda[0] * Math.log(tmp))));
             tmp2 = Math.random();
         }
-        while (tmp2 > getLambdaOtT(t) / t);
+        while (tmp2 > getLambdaOtT(t) / lambda[0]);
         return t + 1;
 
     }
@@ -419,9 +435,9 @@ public class Main {
     private static double getLambdaOtT(double t) {
 
         if (t < 120 && t > 0)
-            return 0.9;
+            return 0.3;
         else
-            return 0.7;
+            return 0.2;
 
     }
 
