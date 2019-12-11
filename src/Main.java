@@ -80,7 +80,13 @@ public class Main {
         System.out.println("Q:" + Q);
         System.out.println("P1:" + P1);
         System.out.println("P2:" + P2);
+        System.out.println("N:" + N);
         System.out.println("S:" + S);
+        for (int i =1; i<= N; i++)
+        {
+            System.out.println("s[" + i + "]" + s[i]);
+
+        }
 
 
     }
@@ -548,13 +554,19 @@ public class Main {
         for (int i = 1; i <= N; i++) {
             if (C[i] !=0)
             s[i] = C[i] - A[i];
+            else
+            {
+                s[i] = z-A[i];
+
+            }
         }
 
-        for (int i = 0; i < N; i++)
+        for (int i = 1; i <= N; i++)
         {
             tmp+=s[i];
 
         }
+        tmp/=5;
         return tmp;
     }
 
