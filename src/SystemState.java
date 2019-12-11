@@ -28,6 +28,10 @@ public class SystemState {
         return client;
     }
 
+    public int getClientQueueLenght() {
+        return clientQueue.size();
+    }
+
     public int getClientsCount() {
         return clientsCount;
     }

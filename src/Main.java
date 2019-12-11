@@ -6,44 +6,46 @@ public class Main {
     private static int N = 0;
     private static int c1;
     private static int c2;
-    private static double[] A = new double[10000];
-    private static double[] C = new double[10000];
+    private static double[] A = new double[100];
+    private static double[] C = new double[100];
     private static double t1 = 10000000;
     private static double ta = 10000000;
     private static double t2 = 10000000;
     private static double tw = 10000000;
-    private static double t;
-    private static double Q;
-    private static double P1;
-    private static double P2;
+    private static double t = 0;
+    private static double Q = 0;
+    private static double P1 = 0;
+    private static double P2 = 0;
     private static double tl;
-    private static double[] w = new double[10000];
-    private static double W;
-    private static int z = 100;
-    private static double[] timeOfSettingOrder = new double[10000];
-    private static double[] timeOfGettingOrder = new double[10000];
-    private static double[] timeOfCheckingOut = new double[10000];
-    private static double[] timeOfPrepareFood = new double[10000];
-    private static double[] timeOfEatMeal = new double[10000];
+    private static double[] w = new double[100];
+    private static double W = 0;
+    private static int z = 360;
+    private static double[] timeOfSettingOrder = new double[100];
+    private static double[] timeOfGettingOrder = new double[100];
+    private static double[] timeOfCheckingOut = new double[100];
+    private static double[] timeOfPrepareFood = new double[100];
+    private static double[] timeOfEatMeal = new double[100];
     private static SystemState systemState = new SystemState();
 
     public static void main(String[] args) {
 
-        lambda[0] = 0.2;
+        lambda[0] = 0.07;
         lambda[1] = 0.38;
         lambda[2] = 0.38;
-        lambda[3] = 0.1;
-        lambda[4] = 0.08;
+        lambda[3] = 0.09;
+        lambda[4] = 0.06;
         tl = 0;
         ta = createTimeClientArrival(t);
         while (t < z) {
-            if (getMin() == ta)
+            if(getMin() > z)
+                t = getMin();
+            if (getMin() == ta && t < z)
                 newClient();
-            if (getMin() == t1)
+            if (getMin() == t1 && t < z)
                 finishDevice1();
-            if (getMin() == t2)
+            if (getMin() == t2 && t < z)
                 finishDevice2();
-            if (getMin() == tw)
+            if (getMin() == tw && t < z)
                 finishWaiting();
 
         }
@@ -138,7 +140,7 @@ public class Main {
                         client.setServiceType(1);
                         client.setEmptyTime(0);
                         systemState.setClientQueue(client);
-                        w[N] = t;
+                        w[N] = -t;
                         System.out.println("Клиент №" + N + " прибыл и встал в очередь, пока оба устройства заняты " + t);
 
                     }
@@ -450,7 +452,7 @@ public class Main {
         do {
             t = minute;
             double tmp = Math.random();
-            t = (t - (1 / (lambda[0] * Math.log(tmp))));
+            t = (t - ((1 / lambda[0]) * Math.log(tmp)));
             tmp2 = Math.random();
         }
         while (tmp2 > getLambdaOtT(t) / lambda[0]);
@@ -492,6 +494,16 @@ public class Main {
 
     private static void calculateStatistics() {
         t = z;
+
+        Client cl = systemState.getClientFromQueue();
+
+        while(cl.getServiceType() != 0)
+        {
+            w[cl.getNumber()] = w[cl.getNumber()] + t;
+            cl = systemState.getClientFromQueue();
+
+        }
+
         Q = calculateQ();
         P1 = calculateP1();
         P2 = calculateP2();
@@ -500,7 +512,7 @@ public class Main {
 
     private static void rememberStat()
     {
-        Q = Q + systemState.getClientsCount() * (t-tl);
+        Q = Q + systemState.getClientQueueLenght() * (t-tl);
         if (systemState.getFirstDeviceState() != 0 )
         {
             P1 = P1 + (t-tl);
@@ -518,13 +530,10 @@ public class Main {
     private static double calculateW() {
         double tmp = 0;
         for (int i = 0; i < w.length; i++) {
-            if (w[i] == 0)
-                break;
             tmp = tmp + w[i];
 
-
         }
-        return (1 / N) * tmp;
+        return (1.0 / N) * tmp;
 
     }
 
