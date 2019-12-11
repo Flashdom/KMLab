@@ -19,12 +19,14 @@ public class Main {
     private static double tl;
     private static double[] w = new double[100];
     private static double W = 0;
-    private static int z = 360;
+    private static int z = 60;
     private static double[] timeOfSettingOrder = new double[100];
     private static double[] timeOfGettingOrder = new double[100];
     private static double[] timeOfCheckingOut = new double[100];
     private static double[] timeOfPrepareFood = new double[100];
     private static double[] timeOfEatMeal = new double[100];
+    private static double[] s = new double[100];
+    private static double S;
     private static SystemState systemState = new SystemState();
 
     public static void main(String[] args) {
@@ -78,6 +80,7 @@ public class Main {
         System.out.println("Q:" + Q);
         System.out.println("P1:" + P1);
         System.out.println("P2:" + P2);
+        System.out.println("S:" + S);
 
 
     }
@@ -508,6 +511,8 @@ public class Main {
         P1 = calculateP1();
         P2 = calculateP2();
         W = calculateW();
+        S = calculateS();
+
     }
 
     private static void rememberStat()
@@ -529,12 +534,28 @@ public class Main {
 
     private static double calculateW() {
         double tmp = 0;
-        for (int i = 0; i < w.length; i++) {
+        for (int i = 0; i < N; i++) {
             tmp = tmp + w[i];
 
         }
         return (1.0 / N) * tmp;
 
+    }
+
+    private static double calculateS() {
+
+        double tmp = 0;
+        for (int i = 1; i <= N; i++) {
+            if (C[i] !=0)
+            s[i] = C[i] - A[i];
+        }
+
+        for (int i = 0; i < N; i++)
+        {
+            tmp+=s[i];
+
+        }
+        return tmp;
     }
 
 
